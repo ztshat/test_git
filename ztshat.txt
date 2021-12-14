@@ -11,4 +11,6 @@ new branch 7 line
 hello
 
 
-ztshat <add> 14 line 
+ztshat  <add> 14 line 
+        <add> one more line after commit
+        
