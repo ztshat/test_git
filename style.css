@@ -1,0 +1,35 @@
+/* nav */
+/* nav */
+
+.header>nav{
+    display: flex;
+}
+.header>nav>ul{
+    flex: 1;
+}
+.header>nav>ul{
+    display: flex;
+    justify-content: space-around;
+}
+.header li{
+    list-style: none;
+}
+
+/* nav */
+/* nav */
+
+
+/* svg */
+/* svg */
+
+.cube{
+    fill:red;
+    stroke: greenyellow;
+}
+.line{
+    stroke: greenyellow;
+    stroke-width: 20;
+}
+
+/* svg */
+/* svg */
