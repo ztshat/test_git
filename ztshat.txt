@@ -1,16 +1,9 @@
-hello
 world
 yeah!!!!
 1 branch
 suspicious presen
-
-
 new clone
 new branch 7 line
-
-hello
-
-
 ztshat  <add> 14 line 
         <add> one more line after commit
-        
+        <del> all empty lines & line hello
