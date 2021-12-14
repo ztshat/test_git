@@ -2,9 +2,11 @@ world
 yeah!!!!
 1 branch
 suspicious presen
-new clone
 new branch 7 line
 ztshat  <add> 14 line 
-        <add> one more line after commit
         <del> all empty lines & line hello
         <publish> test publish branch "ztshat-14-line"
+        <add> new line
+        <del> line
+        <add> line
+        <del> line
