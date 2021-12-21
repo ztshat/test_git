@@ -1,7 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
-import { doc, getDoc, getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -23,18 +22,6 @@ const app = initializeApp(firebaseConfig);
 
 
 const auth = getAuth(app);
-
-const db = getFirestore(app);
-const docRef = doc(db, "main", "tasks");
-const docSnap = await getDoc(docRef);
-
-if (docSnap.exists()) {
-  console.log("Document data:", docSnap.data());
-} else {
-  // doc.data() will be undefined in this case
-  console.log("No such document!");
-}
-
 // google pop up
 // google pop up
 // google pop up
@@ -48,25 +35,36 @@ console.log(auth);
 const popupGoogle = async function(){
 
     signInWithPopup(auth, provider)
-  .then((result) => {
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential.accessToken;
-    // The signed-in user info.
-    const user = result.user;
-    // ...
-  }).catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // The email of the user's account used.
-    const email = error.email;
-    // The AuthCredential type that was used.
-    const credential = GoogleAuthProvider.credentialFromError(error);
-    // ...
-  });
+    .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        // The signed-in user info.
+        const user = result.user;
+        // ...
+    }).catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.email;
+        // The AuthCredential type that was used.
+        const credential = GoogleAuthProvider.credentialFromError(error);
+        // ...
+        console.log("clicked the X");
+        const btn = document.getElementById("signIn&Out");
+        btn.addEventListener("click", popupGoogle, {once: true});
+    });
 };
 
+
+const signOutVar = async function(){
+    signOut(auth).then(() => {
+        // future popUp here
+      }).catch((error) => {
+        // future error popUp here
+      });
+}
 
 
 // checks user
@@ -80,8 +78,11 @@ onAuthStateChanged(auth, (user) => {
         const uid = user.uid;
         // ...
         btn.innerText = "SIGN OUT"
+        console.log(uid, "user signed in");
+        btn.addEventListener("click", signOutVar, {once: true});
     } else {
         btn.innerText = "SIGN IN"
-        btn.addEventListener("click", popupGoogle);
+        btn.addEventListener("click", popupGoogle, {once: true});
+        console.log("user is not signed in")
     }
 });
