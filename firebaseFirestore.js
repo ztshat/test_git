@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { doc, getDoc, getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"
+import { doc, getDoc, getFirestore, query, getDocs, where, collection, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"
 // config
 const firebaseConfig = {
     apiKey: "AIzaSyC6s_8U18Lo6t6OauWP_kpf0y0bpFThCrk",
@@ -22,14 +22,24 @@ const db = getFirestore(app);
 // code
 
 
-const docRef = doc(db, "main", "tasks");
-const docSnap = await getDoc(docRef);
+// const docRef = doc(db, "main", "tasks");
+// const docSnap = await getDoc(docRef);
 
-if (docSnap.exists()) {
-  console.log("Document data:", docSnap.data());
-} else {
-  // doc.data() will be undefined in this case
-  console.log("No such document!");
+// const q = query(collection(db, "main"), where("01_Form", "==", {'00' : 0,'01' : 0,'02' : 0, '03' : 0}));
+// const querySnapshot = await getDocs(q);
+// querySnapshot.forEach((doced) => {
+//   // doc.data() is never undefined for query doc snapshots
+// });
+
+
+// if (docSnap.exists()) {
+//   await setDoc(doc(db, "main", "leTask"), docSnap.data());
+
+// } else {
+//   // doc.data() will be undefined in this case
+//   console.log("No such document!");
+// }
+export function happy(){
+  console.log("happy")
 }
-
 

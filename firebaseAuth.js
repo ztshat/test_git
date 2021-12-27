@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
+import { doc, getDoc,addDoc , getFirestore, query, getDocs, where, collection, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -18,6 +20,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 // const analytics = getAnalytics(app);
 
 
@@ -25,12 +28,11 @@ const auth = getAuth(app);
 // google pop up
 // google pop up
 // google pop up
-
 const provider = new GoogleAuthProvider();
 // sets pop up language
-auth.useDeviceLanguage();
+// auth.useDeviceLanguage();
 
-console.log(auth);
+// console.log(auth);
 
 const popupGoogle = async function(){
 
@@ -41,7 +43,9 @@ const popupGoogle = async function(){
         const token = credential.accessToken;
         // The signed-in user info.
         const user = result.user;
-        // ...
+
+        checkUser(user.uid, user.displayName); 
+
     }).catch((error) => {
         // Handle Errors here.
         const errorCode = error.code;
@@ -57,6 +61,39 @@ const popupGoogle = async function(){
     });
 };
 
+// Знаходить інформацію користувача в базі даних
+// Якщо інформації користувача не існує (тобто новий користувач),
+// то створити інформацію з шаблону
+// checkUser("bruh");
+async function checkUser(uid, userName){
+    const colRef = collection(db, "main");
+    const q = query(colRef, where("uid", "==", `${uid}`));
+    const querySnapshot = await getDocs(q);
+    if(querySnapshot.empty){
+        createUser(uid, userName);
+    }else{
+        readUser(querySnapshot.docs[0]._document.data.value.mapValue.fields);
+    }
+};
+// Створює документ юзера
+async function createUser(uid, userName){
+    const theDocRef = doc(db, "main", "tasks");
+    const docRef = doc(db, "main", `${userName}`);
+    localStorage.setItem("userDataPath", `${userName}`)
+    const docSnap = await getDoc(theDocRef);
+    const colRef = collection(db, "main");
+    let uDoc = docSnap.data();
+    // додає шаблону айді
+    uDoc.uid = `${uid}`;
+    await setDoc(docRef, uDoc);
+};
+
+async function readUser(doc){
+    localStorage.setItem("userDataPath", `${doc._key.path.segments[6]}`);
+    console.log(doc);
+};
+
+
 
 const signOutVar = async function(){
     signOut(auth).then(() => {
@@ -64,7 +101,7 @@ const signOutVar = async function(){
       }).catch((error) => {
         // future error popUp here
       });
-}
+};
 
 
 // checks user
@@ -80,9 +117,19 @@ onAuthStateChanged(auth, (user) => {
         btn.innerText = "SIGN OUT"
         console.log(uid, "user signed in");
         btn.addEventListener("click", signOutVar, {once: true});
+        
     } else {
         btn.innerText = "SIGN IN"
         btn.addEventListener("click", popupGoogle, {once: true});
         console.log("user is not signed in")
     }
 });
+
+
+async function sendResult(taskTheme, task){
+    const docName = localStorage.getItem("userDataPath");
+    const theDocRef = doc(db, "main", `${docName}`);
+    await updateDoc(theDocRef, {
+        taskTheme : bruh
+    });
+};

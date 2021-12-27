@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Putter</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="script.js" type="module" enctype="application/javascript"></script>
+    <script defer src="firebaseAuth.js" type="module" enctype="application/javascript"></script>
+    <script defer src="firebaseFirestore.js" type="module" enctype="application/javascript"></script>
+    <script defer src="firebaseTaskSpecification.js" type="module" enctype="application/javascript"></script>
 </head>
 <body>
 
@@ -26,7 +30,7 @@
                 <li>the kind of task</li>
                 <li>the kind of task</li>
                 <li>the kind of task</li>
-                <li>the kind of task</li>
+                <li id="bulb">Bulb</li>
             </ul>
             <button id="signIn&Out">Template text</button>  
         </nav>
@@ -39,6 +43,7 @@
             <label>result</label>
             <input type="range" name="range">
             <input type="submit" name="submit">
+            <select id="task"></select>
         </form>        
     </section>
     <!-- validation imitation -->
@@ -48,7 +53,5 @@
         <h1>and the result is.....</h1>
     </section>
     <!-- validation message -->
-    <script src="script.js"></script>
-    <script src="firebaseScript.js" type="module"></script>
 </body>
 </html>
