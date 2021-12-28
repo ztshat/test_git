@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Putter</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js" type="module" enctype="application/javascript"></script>
+    <script defer src="firebaseAuth.js" type="module" enctype="application/javascript"></script>
+    <script defer src="firebaseFirestore.js" type="module" enctype="application/javascript"></script>
+    <script defer src="firebaseTaskSpecification.js" type="module" enctype="application/javascript"></script>
+</head>
+<body>
+
+    <header class="header">
+        <h1>Personal progress</h1>
+        <svg height="50" width="400">
+            <rect x="0" y="0" height="50" width="50" class="cube" />
+            <rect x="50" y="0" height="50" width="50" class="cube" />
+            <rect x="100" y="0" height="50" width="50" class="cube" />
+            <rect x="150" y="0" height="50" width="50" class="cube" />
+            <rect x="200" y="0" height="50" width="50" class="cube" />
+            <line x1 ="10" y1="25" x2="390" y2="25" class="line"/>
+        </svg>
+        <nav>
+            <ul>
+                <li>the kind of task</li>
+                <li>the kind of task</li>
+                <li>the kind of task</li>
+                <li>the kind of task</li>
+                <li>the kind of task</li>
+                <li id="bulb">Bulb</li>
+            </ul>
+            <button id="signIn&Out">Template text</button>  
+        </nav>
+    </header>
+    
+    <!-- validation imitation -->
+    <section>
+        <h1>Validate</h1>
+        <form>
+            <label>result</label>
+            <input type="range" name="range">
+            <input type="submit" name="submit">
+            <select id="task"></select>
+        </form>        
+    </section>
+    <!-- validation imitation -->
+
+    <!-- validation message -->
+    <section>
+        <h1>and the result is.....</h1>
+    </section>
+    <!-- validation message -->
+</body>
+</html>
