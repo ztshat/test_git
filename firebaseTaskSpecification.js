@@ -16,7 +16,9 @@ const db = getFirestore(app);
 
 const select0 = document.getElementById("task");
 const obj = "option";
-
+const box = document.getElementById("box");
+const obj1 = "div";
+// tasksLoad(box, obj1);
 tasksLoad(select0, obj);
 async function tasksLoad(path, tag){
     const docRef = doc(db, "main", "tasks");
@@ -42,8 +44,8 @@ async function tasksLoad(path, tag){
             // вставляє данні у потрібний об'єкту в потрібні теги
             // console.log(`${item[0]} ${task[0]}`);
             const child = document.createElement(tag);
-            child.innerText = `${obj[0]} ${task[0]}`;
-            child.value =`${obj[0]}>>${task[0]}`;
+            child.innerText = `${obj[0]}_${task[0]}: ${task[1]}`;
+            child.value =`"array":{[${obj[0]}, ${task[0]}]}`;
             path.append(child);
         });
         // for (const task in item[1]){

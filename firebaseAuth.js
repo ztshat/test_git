@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
-import { doc, getDoc,addDoc , getFirestore, query, getDocs, where, collection, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"
+import { doc, getDoc,addDoc , updateDoc, getFirestore, query, getDocs, where, collection, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -72,7 +72,8 @@ async function checkUser(uid, userName){
     if(querySnapshot.empty){
         createUser(uid, userName);
     }else{
-        readUser(querySnapshot.docs[0]._document.data.value.mapValue.fields);
+        readUser(querySnapshot.docs[0]);
+        console.log(querySnapshot);
     }
 };
 // Створює документ юзера
@@ -89,9 +90,57 @@ async function createUser(uid, userName){
 };
 
 async function readUser(doc){
-    localStorage.setItem("userDataPath", `${doc._key.path.segments[6]}`);
     console.log(doc);
+    localStorage.setItem("userDataPath", `${doc._key.path.segments[6]}`);
+    const box = document.getElementById("box");
+    const obj1 = "div";
+    tasksLoad(box, obj1);
 };
+
+async function tasksLoad(path, tag, uid){
+    // const docRef = doc(db, "main", "tasks");
+    // const docSnap = await getDoc(docRef);
+    const colRef = collection(db, "main");
+    const q = query(colRef, where("uid", "==", `${uid}`));
+    const querySnapshot = await getDocs(q);
+
+    // for (const task in docSnap.data()){
+    //     console.log(task);
+    // }
+
+    // проходиться по кожній властивості документа
+    // потім сортує від найменшого до найбільшого
+    querySnapshot.forEach( doc => {
+        Object.entries(doc.data())
+        .sort(sortTasks) 
+        .forEach(obj => {
+            // із-за того що MAP об'єкт має як назву так і властивості,
+            // функція вище повертає масив (властивостей документу)
+            // масивів (назви та властивостей MAP об'єкту )
+            // в нашому випадку назва MAP - це загальна тема завдань (01_Form),
+            // а властивості MAP - це  власне завдання (00, 01, 02, 03)
+            Object.entries(obj[1]).sort((a, b) => 
+                Number(a[0]) - Number(b[0])
+            )
+            .forEach(task => {
+                // вставляє данні у потрібний об'єкту в потрібні теги
+                // console.log(`${item[0]} ${task[0]}`);
+                const child = document.createElement(tag);
+                child.innerText = `${obj[0]}_${task[0]}: ${task[1]}`;
+                child.value =`${obj[0]}>>${task[0]}`;
+                path.append(child);
+            }); 
+    });
+    
+        // for (const task in item[1]){
+        //     console.log(`${item[0]} ${task}`);
+        // }
+    });
+}
+function sortTasks(a, b){
+    return Number(a[0].substring(0,2)) - Number(b[0].substring(0, 2));
+}
+
 
 
 
@@ -125,11 +174,19 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
+// відправка результатів
+const sendBtn = document.getElementById("submit");
+const range = document.getElementById("range");
+const taskSelect = document.getElementById("task");
+sendBtn.addEventListener("click", sendResult);
 
-async function sendResult(taskTheme, task){
+async function sendResult(taskTheme, task, bruh){
+    console.log(taskSelect.value);
     const docName = localStorage.getItem("userDataPath");
     const theDocRef = doc(db, "main", `${docName}`);
-    await updateDoc(theDocRef, {
-        taskTheme : bruh
-    });
+    const theDoc = await getDoc(doc(db, "main", "tasks"));
+    const theDocTemplate = theDoc.data();
+    const tasksIn = taskSelect.value.substring(0,)
+    theDocTemplate["01_Form"]["01"] = 20;
+    await updateDoc(theDocRef, range.value);
 };
