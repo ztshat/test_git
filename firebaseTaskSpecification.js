@@ -21,7 +21,7 @@ const obj1 = "div";
 // tasksLoad(box, obj1);
 tasksLoad(select0, obj);
 async function tasksLoad(path, tag){
-    const docRef = doc(db, "main", "tasks");
+    const docRef = doc(db, "main", "template");
     const docSnap = await getDoc(docRef);
     // for (const task in docSnap.data()){
     //     console.log(task);
@@ -29,7 +29,7 @@ async function tasksLoad(path, tag){
 
     // проходиться по кожній властивості документа
     // потім сортує від найменшого до найбільшого
-    Object.entries(docSnap.data())
+    Object.entries(docSnap.data().tasks)
     .sort(sortTasks) 
     .forEach(obj => {
         // із-за того що MAP об'єкт має як назву так і властивості,
@@ -45,7 +45,8 @@ async function tasksLoad(path, tag){
             // console.log(`${item[0]} ${task[0]}`);
             const child = document.createElement(tag);
             child.innerText = `${obj[0]}_${task[0]}: ${task[1]}`;
-            child.value =`"array":{[${obj[0]}, ${task[0]}]}`;
+            child.taskTheme = obj[0];
+            child.task = task[0];
             path.append(child);
         });
         // for (const task in item[1]){

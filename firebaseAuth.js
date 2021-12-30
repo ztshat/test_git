@@ -66,43 +66,40 @@ const popupGoogle = async function(){
 // то створити інформацію з шаблону
 // checkUser("bruh");
 async function checkUser(uid, userName){
-    const colRef = collection(db, "main");
-    const q = query(colRef, where("uid", "==", `${uid}`));
-    const querySnapshot = await getDocs(q);
-    if(querySnapshot.empty){
+    const docRef = doc(db, "main", uid);
+    const theDoc = await getDoc(docRef);
+    if(!theDoc.data()){
+        console.log("bruh")
         createUser(uid, userName);
     }else{
-        readUser(querySnapshot.docs[0]);
-        console.log(querySnapshot);
+        readUser(theDoc.data(), uid);
+        console.log("double bruh");
     }
 };
 // Створює документ юзера
 async function createUser(uid, userName){
-    const theDocRef = doc(db, "main", "tasks");
-    const docRef = doc(db, "main", `${userName}`);
-    localStorage.setItem("userDataPath", `${userName}`)
+    const theDocRef = doc(db, "main", "template");
+    const docRef = doc(db, "main", `${uid}`);
+    localStorage.setItem("userDataPath", `${uid}`)
     const docSnap = await getDoc(theDocRef);
-    const colRef = collection(db, "main");
     let uDoc = docSnap.data();
     // додає шаблону айді
+    uDoc.userName = `${userName}`;
     uDoc.uid = `${uid}`;
     await setDoc(docRef, uDoc);
 };
 
-async function readUser(doc){
-    console.log(doc);
-    localStorage.setItem("userDataPath", `${doc._key.path.segments[6]}`);
+async function readUser(doc, uid){
+    // console.log(doc);
+    localStorage.setItem("userDataPath", `${uid}`);
     const box = document.getElementById("box");
     const obj1 = "div";
-    tasksLoad(box, obj1);
+    // tasksLoad(box, obj1);
 };
 
 async function tasksLoad(path, tag, uid){
-    // const docRef = doc(db, "main", "tasks");
-    // const docSnap = await getDoc(docRef);
-    const colRef = collection(db, "main");
-    const q = query(colRef, where("uid", "==", `${uid}`));
-    const querySnapshot = await getDocs(q);
+    const docRef = doc(db, "main", uid);
+    const docSnap = await getDoc(docRef);
 
     // for (const task in docSnap.data()){
     //     console.log(task);
@@ -110,28 +107,25 @@ async function tasksLoad(path, tag, uid){
 
     // проходиться по кожній властивості документа
     // потім сортує від найменшого до найбільшого
-    querySnapshot.forEach( doc => {
-        Object.entries(doc.data())
-        .sort(sortTasks) 
-        .forEach(obj => {
-            // із-за того що MAP об'єкт має як назву так і властивості,
-            // функція вище повертає масив (властивостей документу)
-            // масивів (назви та властивостей MAP об'єкту )
-            // в нашому випадку назва MAP - це загальна тема завдань (01_Form),
-            // а властивості MAP - це  власне завдання (00, 01, 02, 03)
-            Object.entries(obj[1]).sort((a, b) => 
-                Number(a[0]) - Number(b[0])
-            )
-            .forEach(task => {
-                // вставляє данні у потрібний об'єкту в потрібні теги
-                // console.log(`${item[0]} ${task[0]}`);
-                const child = document.createElement(tag);
-                child.innerText = `${obj[0]}_${task[0]}: ${task[1]}`;
-                child.value =`${obj[0]}>>${task[0]}`;
-                path.append(child);
-            }); 
-    });
-    
+    Object.entries(docSnap.data().tasks)
+    .sort(sortTasks) 
+    .forEach(obj => {
+        // із-за того що MAP об'єкт має як назву так і властивості,
+        // функція вище повертає масив (властивостей документу)
+        // масивів (назви та властивостей MAP об'єкту )
+        // в нашому випадку назва MAP - це загальна тема завдань (01_Form),
+        // а властивості MAP - це  власне завдання (00, 01, 02, 03)
+        Object.entries(obj[1]).sort((a, b) => 
+            Number(a[0]) - Number(b[0])
+        )
+        .forEach(task => {
+            // вставляє данні у потрібний об'єкту в потрібні теги
+            // console.log(`${item[0]} ${task[0]}`);
+            const child = document.createElement(tag);
+            child.innerText = `${obj[0]}_${task[0]}: ${task[1]}%`;
+            child.value =`${obj[0]}>>${task[0]}`;
+            path.append(child);
+        }); 
         // for (const task in item[1]){
         //     console.log(`${item[0]} ${task}`);
         // }
@@ -180,13 +174,28 @@ const range = document.getElementById("range");
 const taskSelect = document.getElementById("task");
 sendBtn.addEventListener("click", sendResult);
 
-async function sendResult(taskTheme, task, bruh){
-    console.log(taskSelect.value);
+async function sendResult(){
+    const selOpt = taskSelect.options[taskSelect.selectedIndex];
+    // console.log(selOpt.task);
     const docName = localStorage.getItem("userDataPath");
+    // console.log(docName)
     const theDocRef = doc(db, "main", `${docName}`);
-    const theDoc = await getDoc(doc(db, "main", "tasks"));
+    const theDoc = await getDoc(doc(db, "main", `${docName}`));
     const theDocTemplate = theDoc.data();
-    const tasksIn = taskSelect.value.substring(0,)
-    theDocTemplate["01_Form"]["01"] = 20;
-    await updateDoc(theDocRef, range.value);
+    // const tasksIn = taskSelect.value.substring(0,)
+    // console.log(`${taskSelect.task}`, `${taskSelect.taskTheme}`, range.value)
+    theDocTemplate.tasks[`${selOpt.taskTheme}`][`${selOpt.task}`] = Number(range.value);
+    await updateDoc(theDocRef, theDocTemplate);
 };
+
+// відображення результатів
+
+const btn = document.getElementById("showBtn");
+btn.addEventListener("click", showResult);
+
+function showResult(){
+    const uid = localStorage.getItem("userDataPath");
+    const box = document.getElementById("box");
+    const obj1 = "div";
+    tasksLoad(box, obj1, uid);
+}
