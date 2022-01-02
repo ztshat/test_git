@@ -1,7 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
-import { doc, getDoc,addDoc , updateDoc, getFirestore, query, getDocs, where, collection, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -20,7 +19,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 // const analytics = getAnalytics(app);
 
 
@@ -32,9 +30,10 @@ const provider = new GoogleAuthProvider();
 // sets pop up language
 // auth.useDeviceLanguage();
 
-// console.log(auth);
 
-const popupGoogle = async function(){
+import {checkUserOnSignIn, tasksLoad} from "./firebaseFirestore";
+
+export async function popupGoogle(){
 
     signInWithPopup(auth, provider)
     .then((result) => {
@@ -44,7 +43,7 @@ const popupGoogle = async function(){
         // The signed-in user info.
         const user = result.user;
 
-        checkUser(user.uid, user.displayName); 
+        checkUserOnSignIn(user.uid, user.displayName); 
 
     }).catch((error) => {
         // Handle Errors here.
@@ -61,79 +60,6 @@ const popupGoogle = async function(){
     });
 };
 
-// Знаходить інформацію користувача в базі даних
-// Якщо інформації користувача не існує (тобто новий користувач),
-// то створити інформацію з шаблону
-// checkUser("bruh");
-async function checkUser(uid, userName){
-    const docRef = doc(db, "main", uid);
-    const theDoc = await getDoc(docRef);
-    if(!theDoc.data()){
-        console.log("bruh")
-        createUser(uid, userName);
-    }else{
-        readUser(theDoc.data(), uid);
-        console.log("double bruh");
-    }
-};
-// Створює документ юзера
-async function createUser(uid, userName){
-    const theDocRef = doc(db, "main", "template");
-    const docRef = doc(db, "main", `${uid}`);
-    localStorage.setItem("userDataPath", `${uid}`)
-    const docSnap = await getDoc(theDocRef);
-    let uDoc = docSnap.data();
-    // додає шаблону айді
-    uDoc.userName = `${userName}`;
-    uDoc.uid = `${uid}`;
-    await setDoc(docRef, uDoc);
-};
-
-async function readUser(doc, uid){
-    // console.log(doc);
-    localStorage.setItem("userDataPath", `${uid}`);
-    const box = document.getElementById("box");
-    const obj1 = "div";
-    // tasksLoad(box, obj1);
-};
-
-async function tasksLoad(path, tag, uid){
-    const docRef = doc(db, "main", uid);
-    const docSnap = await getDoc(docRef);
-
-    // for (const task in docSnap.data()){
-    //     console.log(task);
-    // }
-
-    // проходиться по кожній властивості документа
-    // потім сортує від найменшого до найбільшого
-    Object.entries(docSnap.data().tasks)
-    .sort(sortTasks) 
-    .forEach(obj => {
-        // із-за того що MAP об'єкт має як назву так і властивості,
-        // функція вище повертає масив (властивостей документу)
-        // масивів (назви та властивостей MAP об'єкту )
-        // в нашому випадку назва MAP - це загальна тема завдань (01_Form),
-        // а властивості MAP - це  власне завдання (00, 01, 02, 03)
-        Object.entries(obj[1]).sort((a, b) => 
-            Number(a[0]) - Number(b[0])
-        )
-        .forEach(task => {
-            // вставляє данні у потрібний об'єкту в потрібні теги
-            // console.log(`${item[0]} ${task[0]}`);
-            const child = document.createElement(tag);
-            child.innerText = `${obj[0]}_${task[0]}: ${task[1]}%`;
-            child.value =`${obj[0]}>>${task[0]}`;
-            path.append(child);
-        }); 
-        // for (const task in item[1]){
-        //     console.log(`${item[0]} ${task}`);
-        // }
-    });
-}
-function sortTasks(a, b){
-    return Number(a[0].substring(0,2)) - Number(b[0].substring(0, 2));
-}
 
 
 
@@ -150,52 +76,33 @@ const signOutVar = async function(){
 // checks user
 // checks user
 // checks user
-onAuthStateChanged(auth, (user) => {
-    const btn = document.getElementById("signIn&Out");
-    if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        const uid = user.uid;
-        // ...
-        btn.innerText = "SIGN OUT"
-        console.log(uid, "user signed in");
-        btn.addEventListener("click", signOutVar, {once: true});
-        
-    } else {
-        btn.innerText = "SIGN IN"
-        btn.addEventListener("click", popupGoogle, {once: true});
-        console.log("user is not signed in")
-    }
-});
+export async function checkUserOnLoad(){
+    onAuthStateChanged(auth, (user) => {
+        const btn = document.getElementById("signIn&Out");
+        if (user) {
+            // User is signed in, see docs for a list of available properties
+            // https://firebase.google.com/docs/reference/js/firebase.User
+            const uid = user.uid;
+            // ...
+            btn.innerText = "SIGN OUT"
+            console.log(uid, "user signed in");
+            btn.addEventListener("click", signOutVar, {once: true});
+            
+            // завантажує опції з документу користувача
+            const select = document.getElementById("task");
+            const obj = "option";
+            tasksLoad(select, obj, uid);
+        } else {
+            btn.innerText = "SIGN IN"
+            btn.addEventListener("click", popupGoogle, {once: true});
+            console.log("user is not signed in");
 
-// відправка результатів
-const sendBtn = document.getElementById("submit");
-const range = document.getElementById("range");
-const taskSelect = document.getElementById("task");
-sendBtn.addEventListener("click", sendResult);
-
-async function sendResult(){
-    const selOpt = taskSelect.options[taskSelect.selectedIndex];
-    // console.log(selOpt.task);
-    const docName = localStorage.getItem("userDataPath");
-    // console.log(docName)
-    const theDocRef = doc(db, "main", `${docName}`);
-    const theDoc = await getDoc(doc(db, "main", `${docName}`));
-    const theDocTemplate = theDoc.data();
-    // const tasksIn = taskSelect.value.substring(0,)
-    // console.log(`${taskSelect.task}`, `${taskSelect.taskTheme}`, range.value)
-    theDocTemplate.tasks[`${selOpt.taskTheme}`][`${selOpt.task}`] = Number(range.value);
-    await updateDoc(theDocRef, theDocTemplate);
+            // завантажує опціїї з шаблонного документу
+            const select = document.getElementById("task");
+            const obj = "option";
+            tasksLoad(select, obj, "template");
+        }
+    });
 };
 
-// відображення результатів
 
-const btn = document.getElementById("showBtn");
-btn.addEventListener("click", showResult);
-
-function showResult(){
-    const uid = localStorage.getItem("userDataPath");
-    const box = document.getElementById("box");
-    const obj1 = "div";
-    tasksLoad(box, obj1, uid);
-}
