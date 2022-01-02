@@ -24,11 +24,9 @@ const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 // google pop up
-// google pop up
-// google pop up
 const provider = new GoogleAuthProvider();
 // sets pop up language
-// auth.useDeviceLanguage();
+auth.useDeviceLanguage();
 
 
 import {checkUserOnSignIn, tasksLoad} from "./firebaseFirestore";
@@ -37,53 +35,40 @@ export async function popupGoogle(){
 
     signInWithPopup(auth, provider)
     .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        // The signed-in user info.
+        // успішна авторизація
         const user = result.user;
-
         checkUserOnSignIn(user.uid, user.displayName); 
 
     }).catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
+        // помилка при авторизації
         console.log("clicked the X");
         const btn = document.getElementById("signIn&Out");
         btn.addEventListener("click", popupGoogle, {once: true});
+
     });
 };
 
 
 
 
-
+// вихід користувача
 const signOutVar = async function(){
     signOut(auth).then(() => {
-        // future popUp here
-      }).catch((error) => {
-        // future error popUp here
-      });
+            // future popUp here
+        }).catch((error) => {
+            // future error popUp here
+        });
 };
 
 
-// checks user
-// checks user
-// checks user
+// перевіряє користувача при вході
 export async function checkUserOnLoad(){
     onAuthStateChanged(auth, (user) => {
         const btn = document.getElementById("signIn&Out");
         if (user) {
-            // User is signed in, see docs for a list of available properties
-            // https://firebase.google.com/docs/reference/js/firebase.User
+
             const uid = user.uid;
-            // ...
+            // тепер кнопка відповідає за вихід користувача
             btn.innerText = "SIGN OUT"
             console.log(uid, "user signed in");
             btn.addEventListener("click", signOutVar, {once: true});
@@ -93,6 +78,8 @@ export async function checkUserOnLoad(){
             const obj = "option";
             tasksLoad(select, obj, uid);
         } else {
+            
+            // тепер кнопка відповідає за вхід користувача
             btn.innerText = "SIGN IN"
             btn.addEventListener("click", popupGoogle, {once: true});
             console.log("user is not signed in");

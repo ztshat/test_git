@@ -13,24 +13,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 export async function sendResult(taskTheme, task, result){
-    const range = document.getElementById("range");
-    const taskSelect = document.getElementById("task");
-    const selOpt = taskSelect.options[taskSelect.selectedIndex];
-    // console.log(selOpt.task);
     const docName = localStorage.getItem("userDataPath");
-    // console.log(docName)
     const theDocRef = doc(db, "main", `${docName}`);
     const theDoc = await getDoc(doc(db, "main", `${docName}`));
     const theDocTemplate = theDoc.data();
-    // const tasksIn = taskSelect.value.substring(0,)
-    // console.log(`${taskSelect.task}`, `${taskSelect.taskTheme}`, range.value)
+    // змінює об'єкт отриманої інформації та відправляє цей самий об'єкт
     theDocTemplate.tasks[`${taskTheme}`][`${task}`] = Number(result);
     await updateDoc(theDocRef, theDocTemplate);
 };
-export async function formSubmit(){
-    const taskSelect = document.getElementById("task");
-    const selOpt = taskSelect.options[taskSelect.selectedIndex];
-    const range = document.getElementById("range");
-
-    sendResult(selOpt.taskTheme, selOpt.task, range);
-}

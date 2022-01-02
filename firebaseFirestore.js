@@ -18,10 +18,6 @@ export async function tasksLoad(path, tag, uid){
     const docRef = doc(db, "main", uid);
     const docSnap = await getDoc(docRef);
 
-    // for (const task in docSnap.data()){
-    //     console.log(task);
-    // }
-
     // проходиться по кожній властивості документа
     // потім сортує від найменшого до найбільшого
     Object.entries(docSnap.data().tasks)
@@ -37,16 +33,12 @@ export async function tasksLoad(path, tag, uid){
         )
         .forEach(task => {
             // вставляє данні у потрібний об'єкту в потрібні теги
-            // console.log(`${item[0]} ${task[0]}`);
             const child = document.createElement(tag);
             child.innerText = `${obj[0]}_${task[0]}: ${task[1]}%`;
             child.taskTheme = obj[0];
             child.task = task[0];
             path.append(child);
         }); 
-        // for (const task in item[1]){
-        //     console.log(`${item[0]} ${task}`);
-        // }
     });
 }
 
@@ -55,7 +47,6 @@ export async function tasksLoad(path, tag, uid){
 // Знаходить інформацію користувача в базі даних
 // Якщо інформації користувача не існує (тобто новий користувач),
 // то створити інформацію з шаблону
-// checkUser("bruh");
 export async function checkUserOnSignIn(uid, userName){
     const docRef = doc(db, "main", uid);
     const theDoc = await getDoc(docRef);
@@ -71,47 +62,22 @@ export async function checkUserOnSignIn(uid, userName){
 async function createUser(uid, userName){
     const theDocRef = doc(db, "main", "template");
     const docRef = doc(db, "main", `${uid}`);
-    localStorage.setItem("userDataPath", `${uid}`)
+    // зберігає посилання на інформацію користувача у локальному сховищі
+    localStorage.setItem("userDataPath", `${uid}`);
     const docSnap = await getDoc(theDocRef);
+    // зберігає інформацію користувача у локальне сховище
+    localStorage.setItem("userData", `${JSON.stringify(docSnap.data())}`);
     let uDoc = docSnap.data();
     // додає шаблону айді
     uDoc.userName = `${userName}`;
     uDoc.uid = `${uid}`;
+    // створює інформацію користувача
     await setDoc(docRef, uDoc);
 };
 
 async function readUser(doc, uid){
-    // console.log(doc);
+    // збергіє данні користувача у локальне сховище
     localStorage.setItem("userDataPath", `${uid}`);
-    const box = document.getElementById("box");
-    const obj1 = "div";
-    // tasksLoad(box, obj1);
+    localStorage.setItem("userData", `${JSON.stringify(doc)}`);
 };
-
-
-// code
-// code
-// code
-
-
-// const docRef = doc(db, "main", "tasks");
-// const docSnap = await getDoc(docRef);
-
-// const q = query(collection(db, "main"), where("01_Form", "==", {'00' : 0,'01' : 0,'02' : 0, '03' : 0}));
-// const querySnapshot = await getDocs(q);
-// querySnapshot.forEach((doced) => {
-//   // doc.data() is never undefined for query doc snapshots
-// });
-
-
-// if (docSnap.exists()) {
-//   await setDoc(doc(db, "main", "leTask"), docSnap.data());
-
-// } else {
-//   // doc.data() will be undefined in this case
-//   console.log("No such document!");
-// }
-export function happy(){
-    console.log("happy")  
-}
 
