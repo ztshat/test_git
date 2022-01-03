@@ -29,7 +29,7 @@ const provider = new GoogleAuthProvider();
 auth.useDeviceLanguage();
 
 
-import {checkUserOnSignIn, tasksLoad} from "./firebaseFirestore";
+import {checkUserOnSignIn, tasksLoad, checkUserVersion} from "./firebaseFirestore";
 
 export async function popupGoogle(){
 
@@ -77,6 +77,8 @@ export async function checkUserOnLoad(){
             const select = document.getElementById("task");
             const obj = "option";
             tasksLoad(select, obj, uid);
+
+            checkUserVersion(null, null, uid, false)
         } else {
             
             // тепер кнопка відповідає за вхід користувача

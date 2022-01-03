@@ -54,7 +54,7 @@ export async function checkUserOnSignIn(uid, userName){
         console.log("bruh")
         createUser(uid, userName);
     }else{
-        readUser(theDoc.data(), uid);
+        checkUserVersion(theDoc, null, uid, true);
         console.log("double bruh");
     }
 };
@@ -75,9 +75,40 @@ async function createUser(uid, userName){
     await setDoc(docRef, uDoc);
 };
 
-async function readUser(doc, uid){
-    // збергіє данні користувача у локальне сховище
-    localStorage.setItem("userDataPath", `${uid}`);
-    localStorage.setItem("userData", `${JSON.stringify(doc)}`);
-};
+export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
+    // userDoc - дані користувача на сервері, якщо = null, або undefined,
+    // тоді виконується запит для отримання даних
 
+    // templateDoc - шаблон даних користувачів, якщо = null, або undefined,
+    // тоді виконується запит для отримання даних
+
+    // uid - айді користувача
+    // saveData = boolean
+    // якщо true, тоді синхронізує дані у локальному сховищі
+
+    if(!userDoc){
+        const userDocRef = doc(db, "main", `${uid}`);
+        userDoc = await getDoc(userDocRef);    
+    }
+    if(!templateDoc){
+        const templateRef = doc(db, "main", "template");
+        templateDoc = await getDoc(templateRef);   
+    }
+
+    if(templateDoc.data().version !== userDoc.data().version){
+        // синхронізує дані користувача
+        const mergeFrom = templateDoc.data();
+        const mergeIn = doc(db, "main", `${uid}`);
+        await setDoc(mergeIn, mergeFrom, { merge: true });
+
+        // синхронізує локальні дані з глобальними 
+        const localData = JSON.parse(localStorage.getItem("userData"));
+        const newLocalData = {...mergeFrom, ...localData}
+        localStorage.setItem("userData", `${JSON.stringify(newLocalData)}`);
+    
+    }else if(templateDoc.data().version == userDoc.data().version && saveData){
+        // saves data
+        localStorage.setItem("userDataPath", `${uid}`);
+        localStorage.setItem("userData", `${JSON.stringify(userDoc.data())}`);
+    }
+}

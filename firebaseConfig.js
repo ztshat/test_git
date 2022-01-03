@@ -45,7 +45,7 @@ async function formSubmit(){
     const taskSelect = document.getElementById("task");
     // існує метод для конкретного значеня (value) обраної опції,
     // але він не підходить для отримання самого обраного HTML об'єкту,
-    // тому використано подані нижче (береться індекс обраної опції 
+    // тому використано методи подані нижче (береться індекс обраної опції 
     // та шукається в масиві опцій)
     const selOpt = taskSelect.options[taskSelect.selectedIndex];
     const range = document.getElementById("range");
