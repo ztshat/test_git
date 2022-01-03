@@ -63,10 +63,9 @@ const signOutVar = async function(){
 
 // перевіряє користувача при вході
 export async function checkUserOnLoad(){
-    console.log(auth.currentUser);
-    setTimeout(() => {console.log(auth.currentUser)}, 1000);
+    // console.log(auth.currentUser);
+    // setTimeout(() => {console.log(auth.currentUser)}, 1000);
     onAuthStateChanged(auth, (user) => {
-        reload(user)
         const btn = document.getElementById("signIn&Out");
         if (user) {
 

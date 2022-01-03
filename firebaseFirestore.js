@@ -91,12 +91,13 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     // uid - айді користувача
     // saveData = boolean
     // якщо true, тоді синхронізує дані у локальному сховищі
-
+    console.log("attempt to change");
     if(!userDoc){
         const userDocRef = doc(db, "main", `${uid}`);
         userDoc = await getDoc(userDocRef);
         // із-за того, що створення 
         if(!userDoc){
+            console.log("change failed");
             return;
         }; 
     }
