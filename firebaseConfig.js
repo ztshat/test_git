@@ -35,7 +35,7 @@ checkUserOnLoad();
 
 // відправка результатів через формочку
 
-import { sendResult } from "./firebaseConfig.js";
+import { sendResult } from "./sendResults.js";
 import { tasksLoad } from "./firebaseFirestore.js";
 
 const sendBtn = document.getElementById("submit");

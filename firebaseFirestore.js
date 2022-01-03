@@ -20,8 +20,9 @@ export async function tasksLoad(path, tag, uid){
 
     // проходиться по кожній властивості документа
     // потім сортує від найменшого до найбільшого
+    console.log(docSnap.data())
     Object.entries(docSnap.data().tasks)
-    .sort(Number(a[0].substring(0,2)) - Number(b[0].substring(0, 2))) 
+    .sort((a,b) => Number(a[0].substring(0,2)) - Number(b[0].substring(0, 2))) 
     .forEach(obj => {
         // із-за того що MAP об'єкт має як назву так і властивості,
         // функція вище повертає масив (властивостей документу)
@@ -40,7 +41,7 @@ export async function tasksLoad(path, tag, uid){
             path.append(child);
         }); 
     });
-}
+};
 
 
 

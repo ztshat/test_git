@@ -29,7 +29,7 @@ const provider = new GoogleAuthProvider();
 auth.useDeviceLanguage();
 
 
-import {checkUserOnSignIn, tasksLoad, checkUserVersion} from "./firebaseFirestore";
+import {checkUserOnSignIn, tasksLoad, checkUserVersion} from "./firebaseFirestore.js";
 
 export async function popupGoogle(){
 
@@ -74,11 +74,12 @@ export async function checkUserOnLoad(){
             btn.addEventListener("click", signOutVar, {once: true});
             
             // завантажує опції з документу користувача
-            const select = document.getElementById("task");
-            const obj = "option";
-            tasksLoad(select, obj, uid);
 
-            checkUserVersion(null, null, uid, false)
+            checkUserVersion(null, null, uid, false).then(() => {
+                const select = document.getElementById("task");
+                const obj = "option";
+                tasksLoad(select, obj, uid);                
+            });
         } else {
             
             // тепер кнопка відповідає за вхід користувача
