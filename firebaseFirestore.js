@@ -51,6 +51,7 @@ export async function tasksLoad(path, tag, uid){
 export async function checkUserOnSignIn(uid, userName){
     const docRef = doc(db, "main", uid);
     const theDoc = await getDoc(docRef);
+
     if(!theDoc.data()){
         console.log("bruh")
         createUser(uid, userName);
@@ -63,15 +64,19 @@ export async function checkUserOnSignIn(uid, userName){
 async function createUser(uid, userName){
     const theDocRef = doc(db, "main", "template");
     const docRef = doc(db, "main", `${uid}`);
+
     // зберігає посилання на інформацію користувача у локальному сховищі
     localStorage.setItem("userDataPath", `${uid}`);
     const docSnap = await getDoc(theDocRef);
+
     // зберігає інформацію користувача у локальне сховище
     localStorage.setItem("userData", `${JSON.stringify(docSnap.data())}`);
     let uDoc = docSnap.data();
+
     // додає шаблону айді
     uDoc.userName = `${userName}`;
     uDoc.uid = `${uid}`;
+
     // створює інформацію користувача
     await setDoc(docRef, uDoc);
 };
@@ -89,13 +94,17 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
 
     if(!userDoc){
         const userDocRef = doc(db, "main", `${uid}`);
-        userDoc = await getDoc(userDocRef);    
+        userDoc = await getDoc(userDocRef);
+        // із-за того, що створення 
+        if(!userDoc){
+            return;
+        }; 
     }
     if(!templateDoc){
         const templateRef = doc(db, "main", "template");
         templateDoc = await getDoc(templateRef);   
     }
-
+    console.log(userDoc.data(), templateDoc.data());
     if(templateDoc.data().version !== userDoc.data().version){
         // синхронізує дані користувача
         const mergeFrom = templateDoc.data();

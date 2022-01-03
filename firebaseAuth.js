@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
+import { getAuth, getIdToken, reload, getIdTokenResult, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -63,7 +63,10 @@ const signOutVar = async function(){
 
 // перевіряє користувача при вході
 export async function checkUserOnLoad(){
+    console.log(auth.currentUser);
+    setTimeout(() => {console.log(auth.currentUser)}, 1000);
     onAuthStateChanged(auth, (user) => {
+        reload(user)
         const btn = document.getElementById("signIn&Out");
         if (user) {
 
@@ -75,11 +78,10 @@ export async function checkUserOnLoad(){
             
             // завантажує опції з документу користувача
 
-            checkUserVersion(null, null, uid, false).then(() => {
-                const select = document.getElementById("task");
-                const obj = "option";
-                tasksLoad(select, obj, uid);                
-            });
+            checkUserVersion(null, null, uid, false)
+            const select = document.getElementById("task");
+            const obj = "option";
+            // tasksLoad(select, obj, uid);
         } else {
             
             // тепер кнопка відповідає за вхід користувача
