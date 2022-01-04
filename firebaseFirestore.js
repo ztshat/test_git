@@ -96,7 +96,8 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
         const userDocRef = doc(db, "main", `${uid}`);
         userDoc = await getDoc(userDocRef);
         // із-за того, що створення 
-        if(!userDoc){
+        console.log(userDoc._document);
+        if(!userDoc._document){
             console.log("change failed");
             return;
         }; 
@@ -107,15 +108,19 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     }
     console.log(userDoc.data(), templateDoc.data());
     if(templateDoc.data().version !== userDoc.data().version){
-        // синхронізує дані користувача
-        const mergeFrom = templateDoc.data();
-        const mergeIn = doc(db, "main", `${uid}`);
-        console.log(mergeFrom);
-        await setDoc(mergeIn, mergeFrom, {merge: true});
+
         // синхронізує локальні дані з глобальними 
         const localData = JSON.parse(localStorage.getItem("userData"));
-        const newLocalData = {...mergeFrom, ...localData}
+        const mergeFrom = templateDoc.data();
+        const newLocalData = mergeObjects(mergeFrom, localData);
+        console.log(newLocalData);
         localStorage.setItem("userData", `${JSON.stringify(newLocalData)}`);
+
+        // синхронізує дані користувача
+        const mergeRef = doc(db, "main", `${uid}`);
+        console.log(mergeFrom);
+        
+        await setDoc(mergeRef, newLocalData, {merge: true});
     
     }else if(templateDoc.data().version == userDoc.data().version && saveData){
         // saves data
@@ -123,3 +128,26 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
         localStorage.setItem("userData", `${JSON.stringify(userDoc.data())}`);
     }
 }
+
+
+function mergeObjects(mergeFrom, mergeIn){
+    //mergeFrom - шаблон з новими властивостями
+    //mergeIn - об'єкт зі значеннями, які потрібно зберегти
+    Object.entries(mergeFrom).forEach(property => {
+        // console.log(Array.isArray(property[1]),typeof meWhen, property[1]);
+        if(
+            typeof property == "object" &&
+            typeof property[1] == "object" &&
+            !Array.isArray(property[1]) &&
+            property !== null
+        ){
+            if(mergeIn[`${property[0]}`]){
+                Object.assign(mergeFrom[`${property[0]}`], mergeIn[`${property[0]}`]);            
+            }else{
+                mergeIn[`${property[0]}`] = property[1];
+            }
+            // console.log(task0[`${property[0]}`])
+        }
+    });
+    return mergeFrom;
+};
