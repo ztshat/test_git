@@ -110,17 +110,21 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     if(templateDoc.data().version !== userDoc.data().version){
 
         // синхронізує локальні дані з глобальними 
-        const localData = JSON.parse(localStorage.getItem("userData"));
+        const localData = userDoc.data();
+        // JSON.parse(localStorage.getItem("userData"));
         const mergeFrom = templateDoc.data();
-        const newLocalData = mergeObjects(mergeFrom, localData);
-        console.log(newLocalData);
+        const newLocalData = mergeObjects(mergeFrom.tasks, localData.tasks);
+        const ultimateData = localData;
+        ultimateData.tasks = newLocalData;
+        ultimateData.version = mergeFrom.version;
+        console.log(ultimateData);
         localStorage.setItem("userData", `${JSON.stringify(newLocalData)}`);
 
         // синхронізує дані користувача
         const mergeRef = doc(db, "main", `${uid}`);
         console.log(mergeFrom);
         
-        await setDoc(mergeRef, newLocalData, {merge: true});
+        await setDoc(mergeRef, ultimateData, {merge: true});
     
     }else if(templateDoc.data().version == userDoc.data().version && saveData){
         // saves data
@@ -130,24 +134,53 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
 }
 
 
-function mergeObjects(mergeFrom, mergeIn){
-    //mergeFrom - шаблон з новими властивостями
-    //mergeIn - об'єкт зі значеннями, які потрібно зберегти
+// поєднує значення двох об'єктів
+// (із-за того, що звичайні методи не можуть поєднувати вкладені об'єкти,
+// була створенна кастомна функція)
+function mergeObjects(mergeFrom,mergeIn){
+    // mergeFrom - шаблон з новими властивостями
+    // mergeIn - об'єкт зі значеннями, які потрібно зберегти
+    // проходиться по кожній властивості mergeFrom 
+    // (припускається, що mergeFrom має більше властивостей, ніж mergeIn)
     Object.entries(mergeFrom).forEach(property => {
-        // console.log(Array.isArray(property[1]),typeof meWhen, property[1]);
+        const mergeInPropertyObj = mergeIn[`${property[0]}`];
+        const mergeFromPropertyObj = property[1];
         if(
             typeof property == "object" &&
-            typeof property[1] == "object" &&
-            !Array.isArray(property[1]) &&
-            property !== null
+            typeof mergeFromPropertyObj == "object" &&
+            !Array.isArray(mergeFromPropertyObj) &&
+            property !== null &&
+            mergeInPropertyObj
         ){
-            if(mergeIn[`${property[0]}`]){
-                Object.assign(mergeFrom[`${property[0]}`], mergeIn[`${property[0]}`]);            
-            }else{
-                mergeIn[`${property[0]}`] = property[1];
-            }
-            // console.log(task0[`${property[0]}`])
-        }
+            // якщо властивість має непримітивне значення (об'єкт)
+            // if(mergeInPropertyObj){
+                // якщо значення другого об'єкту існує
+                // поєднує вкладені об'єкти 
+                Object.assign(mergeFromPropertyObj, mergeInPropertyObj);            
+            // }
+    
+        }else if(Array.isArray(mergeFromPropertyObj)){
+            // якщо властивість має непримітивне значення (масив)
+            // надає властивості шаблонного об'єкту масив неповторних значень
+            mergeFrom[`${property[0]}`] = mergeUnique(mergeFromPropertyObj,mergeInPropertyObj);
+
+        }else if(mergeInPropertyObj){
+            // якщо властивість має примітивне значення
+            // if(mergeInPropertyObj){
+                // якщо значення другого об'єкту існує
+                // надає властивості шаблонного об'єкту значення другого об'єкту
+                mergeFrom[`${property[0]}`] = mergeInPropertyObj;
+            // };
+        };
     });
+    // повертає зміненний шаблонний об'єкт
     return mergeFrom;
+};
+
+// вкрадено з stackOverflow
+// https://stackoverflow.com/a/44464083
+function mergeUnique(arr1, arr2){
+    return arr1.concat(arr2.filter(function (item) {
+        return arr1.indexOf(item) === -1;
+    }));
 };
