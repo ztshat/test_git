@@ -110,8 +110,8 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
         // синхронізує дані користувача
         const mergeFrom = templateDoc.data();
         const mergeIn = doc(db, "main", `${uid}`);
-        await setDoc(mergeIn, mergeFrom, { merge: true });
-
+        console.log(mergeFrom);
+        await setDoc(mergeIn, mergeFrom, {merge: true});
         // синхронізує локальні дані з глобальними 
         const localData = JSON.parse(localStorage.getItem("userData"));
         const newLocalData = {...mergeFrom, ...localData}
