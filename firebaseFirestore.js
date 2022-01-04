@@ -56,8 +56,8 @@ export async function checkUserOnSignIn(uid, userName){
         console.log("bruh")
         createUser(uid, userName);
     }else{
-        console.log(theDoc, uid);
         checkUserVersion(theDoc, null, uid, true);
+        console.log("double bruh");
     }
 };
 // Створює документ юзера
@@ -91,7 +91,7 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     // uid - айді користувача
     // saveData = boolean
     // якщо true, тоді синхронізує дані у локальному сховищі
-    console.log("attempt to change");
+    console.log("attempt to change")
     if(!userDoc){
         const userDocRef = doc(db, "main", `${uid}`);
         userDoc = await getDoc(userDocRef);
@@ -110,7 +110,7 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
         // синхронізує дані користувача
         const mergeFrom = templateDoc.data();
         const mergeIn = doc(db, "main", `${uid}`);
-        await setDoc(mergeFrom, mergeIn, { merge: true });
+        await setDoc(mergeIn, mergeFrom, { merge: true });
 
         // синхронізує локальні дані з глобальними 
         const localData = JSON.parse(localStorage.getItem("userData"));
