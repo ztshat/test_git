@@ -14,7 +14,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// завантажує усі завдання (та їх значення у документі) у обранний об'єкт
 export async function tasksLoad(path, tag, uid){
+    // path - об'єкт батько для завантаження завдань
+    // tag - HTML тег у якому буде запаковане завдання 
+    // uid - посилання на документ (userId)
     const docRef = doc(db, "main", uid);
     const docSnap = await getDoc(docRef);
 
@@ -49,6 +53,8 @@ export async function tasksLoad(path, tag, uid){
 // Якщо інформації користувача не існує (тобто новий користувач),
 // то створити інформацію з шаблону
 export async function checkUserOnSignIn(uid, userName){
+    // uid - посилання на документ (userId), отримане при авторизації
+    // userName - ім'я користувача, отримане при авторизації
     const docRef = doc(db, "main", uid);
     const theDoc = await getDoc(docRef);
 
@@ -60,8 +66,10 @@ export async function checkUserOnSignIn(uid, userName){
         console.log("double bruh");
     }
 };
-// Створює документ юзера
+// Створює документ користувача
 async function createUser(uid, userName){
+    // uid - посилання на документ (userId), отримане при авторизації
+    // userName - ім'я користувача, отримане при авторизації
     const theDocRef = doc(db, "main", "template");
     const docRef = doc(db, "main", `${uid}`);
 
@@ -81,6 +89,7 @@ async function createUser(uid, userName){
     await setDoc(docRef, uDoc);
 };
 
+// перевіряє версію даних користувача
 export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     // userDoc - дані користувача на сервері, якщо = null, або undefined,
     // тоді виконується запит для отримання даних
@@ -134,6 +143,8 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
 }
 
 
+
+
 // поєднує значення двох об'єктів
 // (із-за того, що звичайні методи не можуть поєднувати вкладені об'єкти,
 // була створенна кастомна функція)
@@ -152,8 +163,8 @@ function mergeObjects(mergeFrom,mergeIn){
             property !== null &&
             mergeInPropertyObj
         ){
-            // якщо властивість має непримітивне значення (об'єкт)
-            // if(mergeInPropertyObj){
+            // якщо властивість має непримітивне значення (об'єкт) 
+            // та якщо ця властивість має теж ім'я, що й у mergeIn 
                 // якщо значення другого об'єкту існує
                 // поєднує вкладені об'єкти 
                 Object.assign(mergeFromPropertyObj, mergeInPropertyObj);            
@@ -176,9 +187,15 @@ function mergeObjects(mergeFrom,mergeIn){
     // повертає зміненний шаблонний об'єкт
     return mergeFrom;
 };
+/* недоліки:
 
+------------ якщо mergeIn має прямі властивості, 
+що не властиві mergeFrom, тоді вони не будуть задані у mergeFrom на виході (за потреби можливо вирішити)
+
+*/
 // вкрадено з stackOverflow
 // https://stackoverflow.com/a/44464083
+// з'єднує унікальні значення з двох масивів
 function mergeUnique(arr1, arr2){
     return arr1.concat(arr2.filter(function (item) {
         return arr1.indexOf(item) === -1;

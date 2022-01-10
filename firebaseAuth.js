@@ -31,6 +31,7 @@ auth.useDeviceLanguage();
 
 import {checkUserOnSignIn, tasksLoad, checkUserVersion} from "./firebaseFirestore.js";
 
+// відповідає за появу вікна для авторизації через гугл аккаунт 
 export async function popupGoogle(){
 
     signInWithPopup(auth, provider)
@@ -61,10 +62,10 @@ const signOutVar = async function(){
 };
 
 
-// перевіряє користувача при вході
+// спрацьовує на завантаженні сторінки
+// перевіряє чи ввійшов користувач у систему
+// перевіряє версію уже ввійшовшого користувача
 export async function checkUserOnLoad(){
-    // console.log(auth.currentUser);
-    // setTimeout(() => {console.log(auth.currentUser)}, 1000);
     onAuthStateChanged(auth, (user) => {
         const btn = document.getElementById("signIn&Out");
         if (user) {
