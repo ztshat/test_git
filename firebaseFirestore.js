@@ -59,11 +59,11 @@ export async function checkUserOnSignIn(uid, userName){
     const theDoc = await getDoc(docRef);
 
     if(!theDoc.data()){
-        console.log("bruh")
+        console.log("creating user");
         createUser(uid, userName);
     }else{
         checkUserVersion(theDoc, null, uid, true);
-        console.log("double bruh");
+        console.log("checking users version");
     }
 };
 // Створює документ користувача
@@ -100,21 +100,24 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     // uid - айді користувача
     // saveData = boolean
     // якщо true, тоді синхронізує дані у локальному сховищі
-    console.log("attempt to change")
-    if(!userDoc){
+    console.log("attempt to change");
+    if(!userDoc && !localStorage.getItem("userData")){
         const userDocRef = doc(db, "main", `${uid}`);
         userDoc = await getDoc(userDocRef);
         // із-за того, що створення 
+        localStorage.setItem("userData", JSON.stringify(userDoc.data()));
         console.log(userDoc._document);
         if(!userDoc._document){
             console.log("change failed");
             return;
         }; 
-    }
+    }else if(userDoc && !localStorage.getItem("userData")){
+        localStorage.setItem("userData", JSON.stringify(userDoc.data()));
+    };
     if(!templateDoc){
         const templateRef = doc(db, "main", "template");
         templateDoc = await getDoc(templateRef);   
-    }
+    };
     console.log(userDoc.data(), templateDoc.data());
     if(templateDoc.data().version !== userDoc.data().version){
 
@@ -142,7 +145,11 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     }
 }
 
-
+async function saveLocal(item, uid, template){
+    if(typeof item == "object"){
+        localStorage
+    }
+}
 
 
 // поєднує значення двох об'єктів
