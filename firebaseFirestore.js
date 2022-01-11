@@ -82,8 +82,8 @@ async function createUser(uid, userName){
     let uDoc = docSnap.data();
 
     // додає шаблону айді
-    uDoc.userName = `${userName}`;
-    uDoc.uid = `${uid}`;
+    uDoc.userName = userName;
+    uDoc.uid = uid;
 
     // створює інформацію користувача
     await setDoc(docRef, uDoc);
@@ -100,31 +100,41 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     // uid - айді користувача
     // saveData = boolean
     // якщо true, тоді синхронізує дані у локальному сховищі
+    console.log(userDoc, "something is  wrong");
     console.log("attempt to change");
     if(!userDoc && !localStorage.getItem("userData")){
         const userDocRef = doc(db, "main", `${uid}`);
-        userDoc = await getDoc(userDocRef);
+        const docMat = await getDoc(userDocRef);
+        userDoc = docMat.data();
         // із-за того, що створення 
-        localStorage.setItem("userData", JSON.stringify(userDoc.data()));
+        localStorage.setItem("userData", JSON.stringify(userDoc));
         console.log(userDoc._document);
+        console.log(userDoc, "something is  wrong");
         if(!userDoc._document){
             console.log("change failed");
             return;
         }; 
     }else if(userDoc && !localStorage.getItem("userData")){
+        console.log(userDoc, "something is  wrong");
         localStorage.setItem("userData", JSON.stringify(userDoc.data()));
+
+    }else if(!userDoc && localStorage.getItem("userData")){
+        // console.log("something is  wrong", JSON.parse(localStorage.getItem("userData")));
+        userDoc = JSON.parse(localStorage.getItem("userData"));
     };
     if(!templateDoc){
         const templateRef = doc(db, "main", "template");
-        templateDoc = await getDoc(templateRef);   
+        const docMat = await getDoc(templateRef);
+        templateDoc = docMat.data();
     };
-    console.log(userDoc.data(), templateDoc.data());
-    if(templateDoc.data().version !== userDoc.data().version){
+    // console.log(userDoc.data(), templateDoc.data());
+    if(templateDoc.version !== userDoc.version){
 
         // синхронізує локальні дані з глобальними 
-        const localData = userDoc.data();
+        const localData = userDoc;
         // JSON.parse(localStorage.getItem("userData"));
-        const mergeFrom = templateDoc.data();
+        const mergeFrom = templateDoc;
+        console.log(mergeFrom.tasks, localData.tasks, mergeFrom, localData)
         const newLocalData = mergeObjects(mergeFrom.tasks, localData.tasks);
         const ultimateData = localData;
         ultimateData.tasks = newLocalData;
@@ -138,10 +148,10 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
         
         await setDoc(mergeRef, ultimateData, {merge: true});
     
-    }else if(templateDoc.data().version == userDoc.data().version && saveData){
+    }else if(templateDoc.version == userDoc.version && saveData){
         // saves data
         localStorage.setItem("userDataPath", `${uid}`);
-        localStorage.setItem("userData", `${JSON.stringify(userDoc.data())}`);
+        localStorage.setItem("userData", `${JSON.stringify(userDoc)}`);
     }
 }
 
@@ -155,12 +165,13 @@ async function saveLocal(item, uid, template){
 // поєднує значення двох об'єктів
 // (із-за того, що звичайні методи не можуть поєднувати вкладені об'єкти,
 // була створенна кастомна функція)
-function mergeObjects(mergeFrom,mergeIn){
+export function mergeObjects(mergeFrom,mergeIn){
     // mergeFrom - шаблон з новими властивостями
     // mergeIn - об'єкт зі значеннями, які потрібно зберегти
     // проходиться по кожній властивості mergeFrom 
     // (припускається, що mergeFrom має більше властивостей, ніж mergeIn)
     Object.entries(mergeFrom).forEach(property => {
+        console.log(mergeIn);
         const mergeInPropertyObj = mergeIn[`${property[0]}`];
         const mergeFromPropertyObj = property[1];
         if(

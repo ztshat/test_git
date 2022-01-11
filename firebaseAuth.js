@@ -55,6 +55,7 @@ export async function popupGoogle(){
 // вихід користувача
 const signOutVar = async function(){
     signOut(auth).then(() => {
+        localStorage.clear();
             // future popUp here
         }).catch((error) => {
             // future error popUp here
@@ -78,7 +79,7 @@ export async function checkUserOnLoad(){
             
             // завантажує опції з документу користувача
 
-            checkUserVersion(null, null, uid, false)
+            checkUserVersion(null, null, uid, false);
             const select = document.getElementById("task");
             const obj = "option";
             // tasksLoad(select, obj, uid);
