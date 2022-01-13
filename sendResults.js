@@ -15,13 +15,13 @@ const db = getFirestore(app);
 
 export async function sendResult(taskTheme, task, result){
     const docName = localStorage.getItem("userDataPath");
-    const localDoc = JSON.parse(localStorage.getItem("userData"));
+    // const localDoc = JSON.parse(localStorage.getItem("userData"));
     const theDocRef = doc(db, "main", `${docName}`);
     const theDoc = await getDoc(doc(db, "main", `${docName}`));
     const theDocTemplate = theDoc.data();
     // змінює об'єкт отриманої інформації та відправляє цей самий об'єкт
-    localDoc.tasks[taskTheme][task] = Number(result);
+    // localDoc.tasks[taskTheme][task] = Number(result);
     theDocTemplate.tasks[taskTheme][task] = Number(result);
-    localStorage.setItem("userData",JSON.stringify(localDoc));
+    localStorage.setItem("userData",JSON.stringify(theDocTemplate));
     await updateDoc(theDocRef, theDocTemplate);
 };

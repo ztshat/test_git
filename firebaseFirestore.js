@@ -59,11 +59,11 @@ export async function checkUserOnSignIn(uid, userName){
     const theDoc = await getDoc(docRef);
 
     if(!theDoc.data()){
-        console.log("creating user");
+        console.log("bruh")
         createUser(uid, userName);
     }else{
         checkUserVersion(theDoc, null, uid, true);
-        console.log("checking users version");
+        console.log("double bruh");
     }
 };
 // Створює документ користувача
@@ -100,35 +100,28 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     // uid - айді користувача
     // saveData = boolean
     // якщо true, тоді синхронізує дані у локальному сховищі
-    console.log(userDoc, "something is  wrong");
-    console.log("attempt to change");
-    if(!userDoc && !localStorage.getItem("userData")){
+
+    console.log("attempt to change")
+    if(!userDoc){
+
         const userDocRef = doc(db, "main", `${uid}`);
         const docMat = await getDoc(userDocRef);
         userDoc = docMat.data();
         // із-за того, що створення 
-        localStorage.setItem("userData", JSON.stringify(userDoc));
         console.log(userDoc._document);
         console.log(userDoc, "something is  wrong");
         if(!userDoc._document){
             console.log("change failed");
             return;
         }; 
-    }else if(userDoc && !localStorage.getItem("userData")){
-        console.log(userDoc, "something is  wrong");
-        localStorage.setItem("userData", JSON.stringify(userDoc.data()));
 
-    }else if(!userDoc && localStorage.getItem("userData")){
-        // console.log("something is  wrong", JSON.parse(localStorage.getItem("userData")));
-        userDoc = JSON.parse(localStorage.getItem("userData"));
-    };
+    }
     if(!templateDoc){
         const templateRef = doc(db, "main", "template");
-        const docMat = await getDoc(templateRef);
-        templateDoc = docMat.data();
-    };
-    // console.log(userDoc.data(), templateDoc.data());
-    if(templateDoc.version !== userDoc.version){
+        templateDoc = await getDoc(templateRef);   
+    }
+    console.log(userDoc.data(), templateDoc.data());
+    if(templateDoc.data().version !== userDoc.data().version){
 
         // синхронізує локальні дані з глобальними 
         const localData = userDoc;
@@ -155,11 +148,7 @@ export async function checkUserVersion(userDoc, templateDoc, uid, saveData){
     }
 }
 
-async function saveLocal(item, uid, template){
-    if(typeof item == "object"){
-        localStorage
-    }
-}
+
 
 
 // поєднує значення двох об'єктів
