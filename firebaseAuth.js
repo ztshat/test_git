@@ -1,7 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
-import { doc, getDoc,addDoc , getFirestore, query, getDocs, where, collection, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"
+import { getAuth, getIdToken, reload, getIdTokenResult, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -20,116 +19,83 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 // const analytics = getAnalytics(app);
 
 
 const auth = getAuth(app);
 // google pop up
-// google pop up
-// google pop up
 const provider = new GoogleAuthProvider();
 // sets pop up language
-// auth.useDeviceLanguage();
+auth.useDeviceLanguage();
 
-// console.log(auth);
 
-const popupGoogle = async function(){
+import {checkUserOnSignIn, tasksLoad, checkUserVersion} from "./firebaseFirestore.js";
+
+// відповідає за появу вікна для авторизації через гугл аккаунт 
+export async function popupGoogle(){
 
     signInWithPopup(auth, provider)
     .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        // The signed-in user info.
+        // успішна авторизація
         const user = result.user;
-
-        checkUser(user.uid, user.displayName); 
+        checkUserOnSignIn(user.uid, user.displayName); 
 
     }).catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
+        // помилка при авторизації
         console.log("clicked the X");
         const btn = document.getElementById("signIn&Out");
         btn.addEventListener("click", popupGoogle, {once: true});
+
     });
 };
 
-// Знаходить інформацію користувача в базі даних
-// Якщо інформації користувача не існує (тобто новий користувач),
-// то створити інформацію з шаблону
-// checkUser("bruh");
-async function checkUser(uid, userName){
-    const colRef = collection(db, "main");
-    const q = query(colRef, where("uid", "==", `${uid}`));
-    const querySnapshot = await getDocs(q);
-    if(querySnapshot.empty){
-        createUser(uid, userName);
-    }else{
-        readUser(querySnapshot.docs[0]._document.data.value.mapValue.fields);
-    }
-};
-// Створює документ юзера
-async function createUser(uid, userName){
-    const theDocRef = doc(db, "main", "tasks");
-    const docRef = doc(db, "main", `${userName}`);
-    localStorage.setItem("userDataPath", `${userName}`)
-    const docSnap = await getDoc(theDocRef);
-    const colRef = collection(db, "main");
-    let uDoc = docSnap.data();
-    // додає шаблону айді
-    uDoc.uid = `${uid}`;
-    await setDoc(docRef, uDoc);
-};
-
-async function readUser(doc){
-    localStorage.setItem("userDataPath", `${doc._key.path.segments[6]}`);
-    console.log(doc);
-};
 
 
 
+// вихід користувача
 const signOutVar = async function(){
     signOut(auth).then(() => {
-        // future popUp here
-      }).catch((error) => {
-        // future error popUp here
-      });
+        localStorage.clear();
+            // future popUp here
+        }).catch((error) => {
+            // future error popUp here
+        });
 };
 
 
-// checks user
-// checks user
-// checks user
-onAuthStateChanged(auth, (user) => {
-    const btn = document.getElementById("signIn&Out");
-    if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        const uid = user.uid;
-        // ...
-        btn.innerText = "SIGN OUT"
-        console.log(uid, "user signed in");
-        btn.addEventListener("click", signOutVar, {once: true});
-        
-    } else {
-        btn.innerText = "SIGN IN"
-        btn.addEventListener("click", popupGoogle, {once: true});
-        console.log("user is not signed in")
-    }
-});
+// спрацьовує на завантаженні сторінки
+// перевіряє чи ввійшов користувач у систему
+// перевіряє версію уже ввійшовшого користувача
+export async function checkUserOnLoad(){
+    onAuthStateChanged(auth, (user) => {
+        const btn = document.getElementById("signIn&Out");
+        if (user) {
 
+            const uid = user.uid;
+            // тепер кнопка відповідає за вихід користувача
+            btn.innerText = "SIGN OUT"
+            console.log(uid, "user signed in");
+            btn.addEventListener("click", signOutVar, {once: true});
+            
+            // завантажує опції з документу користувача
 
-async function sendResult(taskTheme, task){
-    const docName = localStorage.getItem("userDataPath");
-    const theDocRef = doc(db, "main", `${docName}`);
-    await updateDoc(theDocRef, {
-        taskTheme : bruh
+            checkUserVersion(null, null, uid, false);
+            const select = document.getElementById("task");
+            const obj = "option";
+            // tasksLoad(select, obj, uid);
+        } else {
+            
+            // тепер кнопка відповідає за вхід користувача
+            btn.innerText = "SIGN IN"
+            btn.addEventListener("click", popupGoogle, {once: true});
+            console.log("user is not signed in");
+
+            // завантажує опціїї з шаблонного документу
+            const select = document.getElementById("task");
+            const obj = "option";
+            tasksLoad(select, obj, "template");
+        }
     });
 };
+
+
